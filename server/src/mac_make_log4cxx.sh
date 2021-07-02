@@ -3,7 +3,7 @@
 # date: 03/24/2015
 
 LOG4CXX=apache-log4cxx-0.10.0
-LOG4CXX_PATH=http://mirror.bit.edu.cn/apache/logging/log4cxx/0.10.0/$LOG4CXX.tar.gz
+LOG4CXX_PATH=https://archive.apache.org/dist/logging/log4cxx/0.10.0/$LOG4CXX.tar.gz
 CUR_DIR=
 download() {
     if [ -f "$1" ]; then
@@ -82,7 +82,7 @@ build_log4cxx(){
     download $LOG4CXX.tar.gz $LOG4CXX_PATH
     tar -xf $LOG4CXX.tar.gz
     cd $LOG4CXX
-    ./configure --prefix=$CUR_DIR/log4cxx --with-apr=/usr/local/Cellar/apr --with-apr-util=/usr/local/Cellar/apr-util --with-charset=utf-8 --with-logchar=utf-8
+    ./configure --prefix=$CUR_DIR/log4cxx --with-apr=/usr/local/Cellar/apr/1.7.0 --with-apr-util=/usr/local/Cellar/apr-util/1.6.1_3 --with-charset=utf-8 --with-logchar=utf-8
     cp ../simpledateformat.h ./src/main/include/log4cxx/helpers/
     cp ../inputstreamreader.cpp ./src/main/cpp/
     cp ../socketoutputstream.cpp ./src/main/cpp/

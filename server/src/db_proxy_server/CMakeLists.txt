@@ -22,8 +22,8 @@ SET(HIREDIS_LIB_DIR ${SRC_DIR}/hiredis/hiredis-master)
 
 #设置自己mac os的openssl的路径 
 if(APPLE) 
-    SET(OPENSSL_INCLUDE_DIR /usr/local/Cellar/openssl/1.0.2r/include)
-    SET(OPENSSL_LIB_DIR /usr/local/Cellar/openssl/1.0.2r/lib)
+    SET(OPENSSL_INCLUDE_DIR /usr/local/Cellar/openssl@1.1/1.1.1j/include)
+    SET(OPENSSL_LIB_DIR /usr/local/Cellar/openssl@1.1/1.1.1j/lib)
 endif()
 
 if(APPLE)

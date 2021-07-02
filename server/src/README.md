@@ -251,8 +251,80 @@ $ ps -ef|grep server # 查看是否存在db_proxy_server
 
 ## 搭建WEB
 
-1.安装nginx和php
+1. 安装nginx
+```bash
+# 安装nginx
+$ yum install nginx 
+$ systemctl restart nginx
+$ netstat -anp|grep nginx
+tcp        0      0 0.0.0.0:80            0.0.0.0:*               LISTEN      16843/nginx: master
+tcp6       0      0 :::80                 :::*                    LISTEN      16843/nginx: master
+# 此时浏览器输入：http://ip:80，如果出现页面代表成功
+```
 
+2. 安装php
+推荐：
+```bash
+$ yum remove php*   # 先卸载旧的包
+# webtatic 源
+$ rpm -Uvh https://mirror.webtatic.com/yum/el7/webtatic-release.rpm
+# 安装php5.6 和 php-fpm 插件
+$ yum install php56w php56w-fpm
+$ cp /home/repo/github/TeamTalk/auto_setup/nginx_php/php/conf/php-fpm.conf /etc/php-fpm.conf
+$ cp /home/repo/github/TeamTalk/auto_setup/nginx_php/php/conf/php.ini /etc/php.ini
+$ chmod 755 /etc/php-fpm.conf
+$ chmod 755 /etc/php.ini
+```
+
+验证php: 
+```bash
+# 创建目录，存放web文件
+$ mkdir -p /var/www/html
+# 创建验证nginx配置文件
+$ vi /etc/nginx/conf.d/default.conf
+server {
+    listen       8080;
+    server_name  localhost;
+
+    location / {
+        root   /var/www/html;
+        # 默认页增加index.php
+        index  index.php index.html index.htm;
+    }
+
+    #error_page  404              /404.html;
+
+    # redirect server error pages to the static page /50x.html
+    #
+    error_page   500 502 503 504  /50x.html;
+    location = /50x.html {
+        root   /var/www/html;
+    }
+
+    #去掉location ~ \.php$配置节前面的#
+    location ~ \.php$ {
+        root           html;
+        #php-fpm默认的监听端口为9000
+        fastcgi_pass   127.0.0.1:9000;
+        fastcgi_index  index.php;
+        # 文件位置修改为/usr/share/nginx/html
+        fastcgi_param  SCRIPT_FILENAME  /var/www/html$fastcgi_script_name;
+        include        fastcgi_params;
+    }
+}
+
+# 创建测试php页面
+$ vim /var/www/html/index.php
+<?php
+ phpinfo() 
+?>
+$ nginx -s reload #重新载入nginx
+$ systemctl enable php-fpm #将php-fpm设置为开启启动
+$ systemctl start php-fpm #启动php-fpm服务
+$ #浏览器输入：http://ip:8080，如果出现 https://www.cnblogs.com/cnxkey/articles/10685489.html 页面的图片代表成功
+```
+
+废弃: 
 ``` bash
 > cd /home/repo/github/TeamTalk/auto_setup
 > chmod 777 nginx_php/nginx/setup.sh && chmod 777 nginx_php/php/setup.sh # 脚本执行权限
@@ -260,36 +332,38 @@ $ ps -ef|grep server # 查看是否存在db_proxy_server
 > ./nginx_php/php/setup.sh install      # 安装php5.6.6
 ```
 
-2.部署发布web
+2. 部署发布tt管理web后台
 
 ```bash
-> yum install -y zip                                        # 安装压缩软件
-> cd /home/repo/github/TeamTalk && cp -rf php/ tt && zip -r tt.zip tt # 打tt.zip的web源码包
-> mv tt.zip auto_setup/im_web/                              # 放入im_web下，以便脚本能解压安装
-> cd auto_setup/im_web/
-> ./setup.sh install                                        # 发布web包到 nginx /var/www/html/目录下
-> cd /etc/nginx/conf.d/                                     # 进入nginx配置文件目录
-> vim im.com.conf 把80改为如8099                             # 更改web访问端口
+$ yum install -y zip                                        # 安装压缩软件
+$ cd /home/repo/github/TeamTalk && cp -rf php/ tt && zip -r tt.zip tt # 打tt.zip的web源码包
+$ mv tt.zip auto_setup/im_web/                              # 放入im_web下，以便脚本能解压安装
+$ cd auto_setup/im_web/
+$ chmod 777 setup.sh
+$ ./setup.sh install                                        # 发布web包到 nginx /var/www/html/目录下
+$ cd /etc/nginx/conf.d/                                     # 进入nginx配置文件目录
+$ vim im.com.conf # 把80改为如8080                           # 更改web访问端口
 ```
 
-3.临时关闭selinux[https://blog.csdn.net/lzm198707/article/details/50130615](永久关闭selinux参考)
+3. 临时关闭selinux[https://blog.csdn.net/lzm198707/article/details/50130615](永久关闭selinux参考)
 
 ```bash
 > getenforce  
 > setenforce 0      ##设置SELinux 成为permissive模式
 ```
 
-4.启动nginx
+4. 如果启动nginx
 
 ```bash
-> systemctl start nginx  
-> systemctl status nginx    # 查看nginx启动状态
+$ systemctl start nginx  
+$ systemctl status nginx    # 查看nginx启动状态
+$ tail -f /var/log/nginx/error.log # 查看nginx错误Log
 ```
 
-5.启动php-fmp [https://www.cnblogs.com/hnhycnlc888/p/9434309.html](参考)
+5. 如果要启动php-fmp [https://www.cnblogs.com/hnhycnlc888/p/9434309.html](参考)
 
 ```bash
-> /usr/local/php5/sbin/php-fpm
+$ systemctl start php-fpm
 ```
 
-6.打开浏览器，输入：192.168.100.185:8099即可，默认用户admin\admin
+6.打开浏览器，输入：http://ip:8080即可，默认用户admin\admin
