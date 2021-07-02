@@ -1,0 +1,14 @@
+1. 整体流程
+@startuml
+android_ios_win -> login_server: 1. http 获取msg_server地址
+android_ios_win <-- login_server: 2. json返回
+android_ios_win -> im_server: 3. tcp连接 + 登录
+android_ios_win <-- im_server: 4. 登录结果
+
+android_ios_win <-> im_server: 5. 会话列表
+android_ios_win <-> im_server: 6. 好友列表
+android_ios_win <-> im_server: 7. 历史聊天消息
+android_ios_win <-> im_server: 8. 收发消息
+android_ios_win -> im_server: 9. 注销
+@enduml
+
